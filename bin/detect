@@ -1,0 +1,10 @@
+#!/bin/bash
+
+BUILD_DIR=$1
+
+if [ -f "${BUILD_DIR}/telegraf.conf" ]; then
+	echo "Telegraf"
+	exit 0
+fi
+
+exit 1

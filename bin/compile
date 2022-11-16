@@ -1,0 +1,53 @@
+#!/bin/bash
+
+BUILD_DIR=$1
+CACHE_DIR=$2
+
+set -e
+
+if [ -v BUILDPACK_DEBUG ]; then
+	set -x
+fi
+
+download_file() {
+	file_name=$1
+	destination=$2
+	file_url=$3
+	file_sha=$4
+
+	current_sha="N/A"
+	cache_path=${CACHE_DIR}/telegraf/${file_name}
+
+	mkdir -p "${CACHE_DIR}/telegraf/"
+	if [ -f "${cache_path}" ]; then
+		current_sha=$(sha256sum "${cache_path}" | awk '{{ print $1 }}')
+	fi
+
+	if [ "${current_sha}" == "${file_sha}" ]; then
+		echo "[${file_name}] Using cache."
+		cp "${cache_path}" "${destination}"
+		return
+	fi
+
+	echo "[${file_name}] Downloading..."
+	curl --silent --show-error --output "${cache_path}" "${file_url}"
+
+	current_sha=$(sha256sum "${cache_path}" | awk '{{ print $1 }}')
+
+	if [ "${current_sha}" != "${file_sha}" ]; then
+		echo "Downloaded sha for ${file_name} does not match, expected ${current_sha} got ${file_sha}"
+		exit 1
+	fi
+
+	cp "${cache_path}" "${destination}"
+}
+
+
+TELEGRAF_VERSION=${TELEGRAF_VERSION:-1.24.3}
+TELEGRAF_VERSION_SUM=${TELEGRAF_VERSION_SUM:-9a64a244a01851f7839f96526566ddb3e9c236fcb541c1dc1829f25d3755c33e}
+TELEGRAF_DOWNLOAD_URL="https://dl.influxdata.com/telegraf/releases/telegraf-${TELEGRAF_VERSION}_linux_amd64.tar.gz"
+
+download_file "telegraf.tar.gz" "/tmp/telegraf.tar.gz" "${TELEGRAF_DOWNLOAD_URL}" "${TELEGRAF_VERSION_SUM}"
+
+echo "Extracting telegraf"
+tar -xf /tmp/telegraf.tar.gz --directory="${BUILD_DIR}" --strip-components=4 "./telegraf-${TELEGRAF_VERSION}/usr/bin/"
