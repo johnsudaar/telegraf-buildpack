@@ -20,4 +20,4 @@ if [ -v SCALINGO_INFLUX_URL ]; then
 	fi
 fi
 
-/app/telegraf &
+/app/telegraf
