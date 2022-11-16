@@ -2,6 +2,7 @@
 
 BUILD_DIR=$1
 CACHE_DIR=$2
+BASEDIR=$(dirname "$0")
 
 set -e
 
@@ -51,3 +52,6 @@ download_file "telegraf.tar.gz" "/tmp/telegraf.tar.gz" "${TELEGRAF_DOWNLOAD_URL}
 
 echo "Extracting telegraf"
 tar -xf /tmp/telegraf.tar.gz --directory="${BUILD_DIR}" --strip-components=4 "./telegraf-${TELEGRAF_VERSION}/usr/bin/"
+
+echo "Installing run script"
+cp "${BASEDIR}/run" "${BUILD_DIR}/run"

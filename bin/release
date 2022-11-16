@@ -5,5 +5,5 @@ cat <<EOF
 config_vars:
 	TELEGRAF_CONFIG_PATH: /app/telegraf.conf
 default_process_types:
-	web: /app/telegraf
+	web: /app/run
 EOF

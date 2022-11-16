@@ -1,0 +1,23 @@
+#!/bin/bash
+
+export TELEGRAF_CONFIG_PATH=/app/telegraf.conf
+
+if [ -v SCALINGO_INFLUX_URL ]; then
+	REGEX='^([^:]+)://([^:]+):([^@]+)@([^:]+):([^/]+)/([^?]+)(.*)$'
+
+	if [[ $SCALINGO_INFLUX_URL =~ $REGEX ]]; then
+		PROTOCOL=${BASH_REMATCH[1]}
+		USERNAME=${BASH_REMATCH[2]}
+		PASSWORD=${BASH_REMATCH[3]}
+		HOST=${BASH_REMATCH[4]}
+		PORT=${BASH_REMATCH[5]}
+		DB=${BASH_REMATCH[6]}
+
+		export INFLUX_HOST_URL="${PROTOCOL}://${HOST}:${PORT}"
+		export INFLUX_USERNAME=$USERNAME
+		export INFLUX_PASSWORD=$PASSWORD
+		export INFLUX_DATABASE=$DB
+	fi
+fi
+
+/app/telegraf &
